@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 // Helper to generate OTP matching authController logic
 export const generateOTP = (): string => {
@@ -6,18 +6,24 @@ export const generateOTP = (): string => {
 };
 
 export const sendOTPEmail = async (email: string, otp: string) => {
-    // Check if API Key exists
-    if (!process.env.RESEND_API_KEY) {
-        console.log(`\n📧 [MOCK EMAIL - NO RESEND KEY] To: ${email} | OTP: ${otp}\n`);
+    // Check if Credentials exist
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.log(`\n📧 [MOCK EMAIL - NO CREDENTIALS] To: ${email} | OTP: ${otp}\n`);
         return;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
     try {
-        const { data, error } = await resend.emails.send({
-            from: 'SplitEase <onboarding@resend.dev>', // Default testing domain
-            to: [email],
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const info = await transporter.sendMail({
+            from: `"SplitEase" <${process.env.EMAIL_USER}>`,
+            to: email,
             subject: 'Your SplitEase Verification Code',
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -29,14 +35,9 @@ export const sendOTPEmail = async (email: string, otp: string) => {
             `
         });
 
-        if (error) {
-            console.error('Resend API Error:', error);
-            throw error;
-        }
-
-        console.log('Resend Email Sent:', data);
+        console.log('Nodemailer Email Sent:', info.messageId);
     } catch (err) {
-        console.error('Failed to send email via Resend:', err);
+        console.error('Failed to send email via Nodemailer:', err);
         throw err; // Re-throw to be caught by controller
     }
 };
