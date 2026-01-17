@@ -15,6 +15,11 @@ export const sendOTPEmail = async (email: string, otp: string) => {
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
+        },
+        logger: true, // Log to console
+        debug: true, // Include SMTP traffic in logs
+        tls: {
+            rejectUnauthorized: false // Helps with some self-signed cert issues if any
         }
     });
 

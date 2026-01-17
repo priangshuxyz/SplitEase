@@ -34,12 +34,10 @@ export const register = async (req: Request, res: Response) => {
         // Log OTP first so it's recorded even if email fails
         console.log(`[DEV] OTP for ${email}: ${otp}`);
 
-        try {
-            await sendOTPEmail(email, otp);
-        } catch (emailError) {
-            console.error("Failed to send email:", emailError);
-            // We continue success flow so user can verify manually via logs if needed
-        }
+        // Fire and forget email to speed up response
+        sendOTPEmail(email, otp).catch(emailError => {
+            console.error("Failed to send email (Background):", emailError);
+        });
 
         return res.status(201).json({
             success: true,
