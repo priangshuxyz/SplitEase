@@ -8,12 +8,14 @@ export const generateOTP = (): string => {
 export const sendOTPEmail = async (email: string, otp: string) => {
     // For development, we can use Ethereal or just log it if no real SMTP is provided.
     // Ideally, use environment variables for SMTP config.
-    // Using 'service: gmail' is often more reliable than manual ports for Gmail
+    // Use SendGrid (Recommended for Production)
+    // User needs to set SENDGRID_API_KEY in environment variables
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.sendgrid.net',
+        port: 587,
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
+            user: 'apikey', // This is the required username for SendGrid
+            pass: process.env.SENDGRID_API_KEY // The API Key from SendGrid
         },
         logger: true,
         debug: true
