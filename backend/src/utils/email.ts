@@ -9,9 +9,11 @@ export const sendOTPEmail = async (email: string, otp: string) => {
     // For development, we can use Ethereal or just log it if no real SMTP is provided.
     // Ideally, use environment variables for SMTP config.
     const transporter = nodemailer.createTransport({
-        service: 'gmail', // or use host/port for others
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // true for 465, false for other ports
         auth: {
-            user: process.env.EMAIL_USER, // user should set these
+            user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         }
     });
