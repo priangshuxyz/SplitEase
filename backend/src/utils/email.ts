@@ -8,19 +8,15 @@ export const generateOTP = (): string => {
 export const sendOTPEmail = async (email: string, otp: string) => {
     // For development, we can use Ethereal or just log it if no real SMTP is provided.
     // Ideally, use environment variables for SMTP config.
+    // Using 'service: gmail' is often more reliable than manual ports for Gmail
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // true for 465, false for other ports
+        service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
         },
-        logger: true, // Log to console
-        debug: true, // Include SMTP traffic in logs
-        tls: {
-            rejectUnauthorized: false // Helps with some self-signed cert issues if any
-        }
+        logger: true,
+        debug: true
     });
 
     // Fallback if no env vars (Mock mode for dev)
