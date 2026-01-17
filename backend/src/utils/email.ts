@@ -1,37 +1,42 @@
+import { Resend } from 'resend';
 
-import nodemailer from 'nodemailer';
-
+// Helper to generate OTP matching authController logic
 export const generateOTP = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 export const sendOTPEmail = async (email: string, otp: string) => {
-    // For development, we can use Ethereal or just log it if no real SMTP is provided.
-    // Ideally, use environment variables for SMTP config.
-    // Using 'service: gmail' is often more reliable than manual ports for Gmail
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        },
-        logger: true,
-        debug: true
-    });
-
-    // Fallback if no env vars (Mock mode for dev)
-    if (!process.env.EMAIL_USER) {
-        console.log(`\n📧 [MOCK EMAIL] To: ${email} | OTP: ${otp}\n`);
+    // Check if API Key exists
+    if (!process.env.RESEND_API_KEY) {
+        console.log(`\n📧 [MOCK EMAIL - NO RESEND KEY] To: ${email} | OTP: ${otp}\n`);
         return;
     }
 
-    const mailOptions = {
-        from: `"SplitEase" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Your SplitEase Verification Code',
-        text: `Your verification code is: ${otp}. It expires in 10 minutes.`,
-        html: `<b>Your verification code is: ${otp}</b><br>It expires in 10 minutes.`
-    };
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    await transporter.sendMail(mailOptions);
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'SplitEase <onboarding@resend.dev>', // Default testing domain
+            to: [email],
+            subject: 'Your SplitEase Verification Code',
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2>Welcome to SplitEase!</h2>
+                    <p>Your verification code is:</p>
+                    <h1 style="background-color: #f4f4f5; padding: 20px; text-align: center; letter-spacing: 5px; border-radius: 8px;">${otp}</h1>
+                    <p>This code expires in 10 minutes.</p>
+                </div>
+            `
+        });
+
+        if (error) {
+            console.error('Resend API Error:', error);
+            throw error;
+        }
+
+        console.log('Resend Email Sent:', data);
+    } catch (err) {
+        console.error('Failed to send email via Resend:', err);
+        throw err; // Re-throw to be caught by controller
+    }
 };
