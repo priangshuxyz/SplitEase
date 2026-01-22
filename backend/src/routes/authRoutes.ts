@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { register, login, verifyEmail, verifyOtp, resendOtp } from '../controllers/authController';
+import { register, login } from '../controllers/authController';
 import { body } from 'express-validator';
 import { protect } from '../middlewares/auth';
 
@@ -27,8 +27,5 @@ router.post('/login', [
     body('password').exists(),
 ], login);
 
-router.post('/verify-email', verifyEmail);
-router.post('/verify-otp', verifyOtp);
-router.post('/resend-otp', resendOtp);
 
 export default router;

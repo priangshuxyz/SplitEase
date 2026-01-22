@@ -8,9 +8,6 @@ export interface IUser extends Document {
     phone?: string;
     gender?: 'male' | 'female' | 'other';
     isVerified: boolean;
-    otp?: string;
-    otpExpires?: Date;
-    verificationToken?: string;
     friends: mongoose.Types.ObjectId[];
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -21,10 +18,7 @@ const UserSchema: Schema<IUser> = new Schema({
     password: { type: String, required: true },
     phone: { type: String, trim: true },
     gender: { type: String, enum: ['male', 'female', 'other'] },
-    isVerified: { type: Boolean, default: false },
-    otp: { type: String, select: false },
-    otpExpires: { type: Date },
-    verificationToken: { type: String },
+    isVerified: { type: Boolean, default: true },
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 }, {
     timestamps: true
